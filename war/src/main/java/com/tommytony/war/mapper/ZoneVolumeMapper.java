@@ -128,12 +128,6 @@ public class ZoneVolumeMapper {
 					if (blocksStream != null) {
 						blocksStream.close();
 					}
-					if (signsReader != null) {
-						signsReader.close();
-					}
-					if (invsReader != null) {
-						invsReader.close();
-					}
 				} catch (IOException e) {
 					War.war.log("Failed to close volume file " + volume.getName() + " for warzone " + zoneName + ". " + e.getClass().getName() + " " + e.getMessage(), Level.WARNING);
 					e.printStackTrace();
@@ -311,6 +305,14 @@ public class ZoneVolumeMapper {
             if (!deferred.isEmpty()) {
                 War.war.getServer().getScheduler().scheduleSyncDelayedTask(War.war, deferred, 2);
             }
+            try {
+                if (signsReader != null) {
+                    signsReader.close();
+                }
+                if (invsReader != null) {
+                    invsReader.close();
+                }
+            } catch (Exception ignored) {}
             War.war.getServer().getScheduler().cancelTask(taskID);
             loading = false;
         }
