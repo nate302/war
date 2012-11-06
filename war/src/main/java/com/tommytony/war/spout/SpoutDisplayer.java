@@ -146,7 +146,7 @@ public class SpoutDisplayer {
 			int teamMax = 0, scoreMax = 0, lifeMax = 0;
 			GenericLabel line;
 			
-			GenericLabel teamsHeader = new GenericLabel(ChatColor.GRAY + "War> " + ChatColor.WHITE + zone.getName());
+			GenericLabel teamsHeader = new GenericLabel(ChatColor.GRAY + "MeepCTF> " + ChatColor.WHITE + zone.getName());
 			int teamsHeaderWidth = GenericLabel.getStringWidth(teamsHeader.getText()) + 1;
 			teamsHeader.setAnchor(WidgetAnchor.TOP_LEFT)
 				.setX(3)
@@ -369,7 +369,7 @@ public class SpoutDisplayer {
 			}
 		}
 		
-		if (word.equals("War>")) {
+		if (word.equals("MeepCTF>")) {
 			return ChatColor.GRAY + word + ChatColor.WHITE;
 		}
 		
@@ -394,7 +394,7 @@ public class SpoutDisplayer {
 //			}
 //		}
 //		
-//		if (word.equals("War>")) {
+//		if (word.equals("MeepCTF>")) {
 //			return new Color(200,200,200);
 //		}
 //		

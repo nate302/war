@@ -859,19 +859,19 @@ public class War extends JavaPlugin {
 
 	public void msg(CommandSender sender, String str) {
 		if (sender instanceof Player) {
-			String out = ChatColor.GRAY + "War> " + ChatColor.WHITE + this.colorKnownTokens(str, ChatColor.WHITE) + " ";
+			String out = ChatColor.GRAY + "MeepCTF> " + ChatColor.WHITE + this.colorKnownTokens(str, ChatColor.WHITE) + " ";
 			sender.sendMessage(out);
 		} else {
-			sender.sendMessage("War> " + str);
+			sender.sendMessage("MeepCTF> " + str);
 		}
 	}
 
 	public void badMsg(CommandSender sender, String str) {
 		if (sender instanceof Player) {
-			String out = ChatColor.GRAY + "War> " + ChatColor.RED + this.colorKnownTokens(str, ChatColor.RED) + " ";
+			String out = ChatColor.GRAY + "MeepCTF> " + ChatColor.RED + this.colorKnownTokens(str, ChatColor.RED) + " ";
 			sender.sendMessage(out);
 		} else {
-			sender.sendMessage("War> " + str);
+			sender.sendMessage("MeepCTF> " + str);
 		}
 	}
 
