@@ -101,6 +101,7 @@ public class ZoneVolumeMapper {
 
 				// Now use the block bytes to reset the world blocks
 				if (!onlyLoadCorners) {
+                    volume.clearBlocksThatDontFloat();
 					DeferredBlockResetsJob deferred = new DeferredBlockResetsJob(world);
 
                     ZoneVolumeLoadJob job = new ZoneVolumeLoadJob(volume, deferred, signsReader, invsReader, blockBytes);
@@ -138,12 +139,13 @@ public class ZoneVolumeMapper {
 
     static class ZoneVolumeLoadJob implements Runnable {
         private ZoneVolume volume;
-        private int x, y, z, noOfResetBlocks;
+        private int i, j, k, x, noOfResetBlocks, visitedBlocks = 0, blockReads = 0;
         private DeferredBlockResetsJob deferred;
         private BufferedReader signsReader, invsReader;
         private boolean failed = false;
         private byte[] blockBytes;
         private int taskID;
+        private int counter = 0;
 
         public ZoneVolumeLoadJob(ZoneVolume volume, DeferredBlockResetsJob deferred, BufferedReader signsReader, BufferedReader invsReader, byte[] blockBytes) {
             this.volume = volume;
@@ -151,6 +153,7 @@ public class ZoneVolumeMapper {
             this.signsReader = signsReader;
             this.invsReader = invsReader;
             this.blockBytes = blockBytes;
+            x = volume.getMinX();
         }
 
         public void setID(int taskID) {
@@ -158,14 +161,14 @@ public class ZoneVolumeMapper {
         }
 
         public void run() {
-            int blockReads = 0, visitedBlocks = 0, x = 0, y = 0, z = 0, i = 0, j = 0, k = 0;
+            int y, z;
             int diskBlockType;
             byte diskBlockData;
             Block worldBlock;
             int worldBlockId;
-            volume.clearBlocksThatDontFloat();
-            x = volume.getMinX();
-            for (i = 0; i < volume.getSizeX(); i++) {
+            System.out.println("x before loop " + x);
+            System.out.println("i before loop " + i);
+            for (;i < volume.getSizeX(); i++) {
                 y = volume.getMinY();
                 for (j = 0; j < volume.getSizeY(); j++) {
                     z = volume.getMinZ();
@@ -295,6 +298,14 @@ public class ZoneVolumeMapper {
                     y++;
                 }
                 x++;
+                if (x % 4 == 0) {
+                    i++;
+                    counter++;
+                    System.out.println("i after pass " + i);
+                    System.out.println("x after pass " + x);
+                    System.out.println("Pass");
+                    return;
+                }
             }
             if (!deferred.isEmpty()) {
                 War.war.getServer().getScheduler().scheduleSyncDelayedTask(War.war, deferred, 2);
