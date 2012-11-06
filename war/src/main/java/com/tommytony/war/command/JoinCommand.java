@@ -107,9 +107,9 @@ public class JoinCommand extends AbstractWarCommand {
 			}
 
 			if (foundTeam) {
-				for (Team team : teams) {
+				/*for (Team team : teams) {
 					team.teamcast("" + player.getName() + " joined " + team.getName());
-				}
+				}*/
 			} else {
 				this.msg("No such team. Try /teams.");
 			}

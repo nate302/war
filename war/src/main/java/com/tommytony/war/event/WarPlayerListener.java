@@ -331,9 +331,9 @@ public class WarPlayerListener implements Listener {
 							zone.keepPlayerState(player);
 							War.war.msg(player, "Your inventory is in storage until you exit with '/war leave'.");
 							zone.respawnPlayer(event, team, player);
-							for (Team t : zone.getTeams()) {
+							/*for (Team t : zone.getTeams()) {
 								t.teamcast("" + player.getName() + " joined team " + team.getName() + ".");
-							}
+							}*/
 						} else {
 							event.setTo(zone.getTeleport());
 							War.war.badMsg(player, "Team " + team.getName() + " is full.");

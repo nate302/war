@@ -840,9 +840,9 @@ public class Warzone {
 			}
 			War.war.msg(player, "Your inventory is in storage until you use '/war leave'.");
 			this.respawnPlayer(lowestNoOfPlayers, player);
-			for (Team team : this.teams) {
+			/*for (Team team : this.teams) {
 				team.teamcast("" + player.getName() + " joined team " + lowestNoOfPlayers.getName() + ".");
-			}
+			}*/
 		}
 		return lowestNoOfPlayers;
 	}
@@ -1053,9 +1053,9 @@ public class Warzone {
 			if (removeFromTeam) {
 				playerTeam.removePlayer(player.getName());
 			}
-			for (Team t : this.getTeams()) {
+			/*for (Team t : this.getTeams()) {
 				t.teamcast(playerTeam.getKind().getColor() + player.getName() + ChatColor.WHITE + " left the zone.");
-			}
+			}*/
 			playerTeam.resetSign();
 			
 			if (this.getLobby() != null) {
