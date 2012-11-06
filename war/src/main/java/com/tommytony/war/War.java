@@ -22,6 +22,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
+import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.tommytony.war.command.WarCommandHandler;
@@ -54,6 +55,8 @@ import com.tommytony.war.utility.PlayerState;
 import com.tommytony.war.utility.SizeCounter;
 import com.tommytony.war.utility.WarLogFormatter;
 
+import net.milkbowl.vault.economy.Economy;
+
 /**
  * Main class of War
  *
@@ -73,6 +76,7 @@ public class War extends JavaPlugin {
 	private PluginDescriptionFile desc = null;
 	private boolean loaded = false;
 	private boolean isSpoutServer = false;
+    private Economy economy;
 
 	// Zones and hub
 	private List<Warzone> warzones = new ArrayList<Warzone>();
@@ -110,8 +114,18 @@ public class War extends JavaPlugin {
 	 * @see War.loadWar()
 	 */
 	public void onEnable() {
+        setupEconomy();
 		this.loadWar();
 	}
+
+    private boolean setupEconomy() {
+        RegisteredServiceProvider<Economy> economyProvider = getServer().getServicesManager().getRegistration(net.milkbowl.vault.economy.Economy.class);
+        if (economyProvider != null) {
+            economy = economyProvider.getProvider();
+        }
+
+        return (economy != null);
+    }
 
 	/**
 	 * @see JavaPlugin.onDisable()
@@ -436,6 +450,10 @@ public class War extends JavaPlugin {
 			return "PARSE-ERROR";
 		}
 	}
+
+    public Economy getEconomy() {
+        return economy;
+    }
 
 	public String updateZoneFromNamedParams(Warzone warzone, CommandSender commandSender, String[] arguments) {
 		try {

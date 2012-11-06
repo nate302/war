@@ -17,6 +17,10 @@
             <id>spout-repo</id>
             <url>http://nexus.spout.org/content/groups/public/</url>
         </repository>
+        <repository>
+            <id>vault-repo</id>
+            <url>http://ci.herocraftonline.com/plugin/repository/everything</url>
+        </repository>
     </repositories>
   <issueManagement>
   	<system>Github issues</system>
@@ -77,6 +81,12 @@
     	<version>1.8.5</version>
     	<type>jar</type>
     	<scope>test</scope>
+    </dependency>
+    <dependency>
+        <groupId>net.milkbowl</groupId>
+        <artifactId>vault</artifactId>
+        <version>1.2.13</version>
+        <scope>compile</scope>
     </dependency>
   </dependencies>
 </project>
