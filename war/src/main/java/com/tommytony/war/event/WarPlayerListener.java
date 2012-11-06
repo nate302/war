@@ -286,7 +286,6 @@ public class WarPlayerListener implements Listener {
 		if (locLobby != null) {
 			Warzone zone = locLobby.getZone();
             if (zone.isResetting()) {
-                War.war.badMsg(player, "This zone is resetting");
                 return;
             }
 
