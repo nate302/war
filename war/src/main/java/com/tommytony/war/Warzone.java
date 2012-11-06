@@ -935,7 +935,7 @@ public class Warzone {
 							t.teamcast("A new battle begins. Resetting warzone...");
 						}
 						
-						this.reinitialize();
+						this.reinitialize(false);
 					}
 				}
 			} else {
@@ -1035,9 +1035,13 @@ public class Warzone {
         return getVolume().isResetting();
     }
 
-	public void reinitialize() {
+    public void reinitialize() {
+        reinitialize(true);
+    }
+
+	public void reinitialize(boolean regenerate) {
 		this.isReinitializing = true;
-		this.getVolume().resetBlocksAsJob();
+		if (regenerate) this.getVolume().resetBlocksAsJob();
 		this.initializeZoneAsJob();
 	}
 
