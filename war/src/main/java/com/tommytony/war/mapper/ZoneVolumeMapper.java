@@ -102,147 +102,10 @@ public class ZoneVolumeMapper {
 				// Now use the block bytes to reset the world blocks
 				if (!onlyLoadCorners) {
 					DeferredBlockResetsJob deferred = new DeferredBlockResetsJob(world);
-					int blockReads = 0, visitedBlocks = 0, x = 0, y = 0, z = 0, i = 0, j = 0, k = 0;
-					int diskBlockType;
-					byte diskBlockData;
-					Block worldBlock;
-					int worldBlockId;
-					volume.clearBlocksThatDontFloat();
-					x = volume.getMinX();
-					for (i = 0; i < volume.getSizeX(); i++) {
-						y = volume.getMinY();
-						for (j = 0; j < volume.getSizeY(); j++) {
-							z = volume.getMinZ();
-							for (k = 0; k < volume.getSizeZ(); k++) {
-								try {
-									diskBlockType = blockBytes[visitedBlocks * 2];
-									diskBlockData = blockBytes[visitedBlocks * 2 + 1];
 
-									worldBlock = volume.getWorld().getBlockAt(x, y, z);
-									worldBlockId = worldBlock.getTypeId();
-									if (worldBlockId != diskBlockType || (worldBlockId == diskBlockType && worldBlock.getData() != diskBlockData) || (worldBlockId == diskBlockType && worldBlock.getData() == diskBlockData && (diskBlockType == Material.WALL_SIGN.getId() || diskBlockType == Material.SIGN_POST.getId() || diskBlockType == Material.CHEST.getId() || diskBlockType == Material.DISPENSER.getId()))) {
-										if (diskBlockType == Material.WALL_SIGN.getId() || diskBlockType == Material.SIGN_POST.getId()) {
-											// Signs read
-											String linesStr = signsReader.readLine();
-											String[] lines = linesStr.split(";;");
-
-											// Signs set
-											if (diskBlockType == Material.WALL_SIGN.getId() && ((diskBlockData & 0x04) == 0x04) && i + 1 != volume.getSizeX()) {
-												// A sign post hanging on a wall south of here needs that block to be set first
-												deferred.add(new DeferredBlockReset(x, y, z, diskBlockType, diskBlockData, lines));
-											} else {
-												worldBlock.setType(Material.getMaterial(diskBlockType));
-												BlockState state = worldBlock.getState();
-												state.setData(new org.bukkit.material.Sign(diskBlockType, diskBlockData));
-												if (state instanceof Sign) {
-													Sign sign = (Sign) state;
-													if (lines != null && sign.getLines() != null) {
-														if (lines.length > 0) {
-															sign.setLine(0, lines[0]);
-														}
-														if (lines.length > 1) {
-															sign.setLine(1, lines[1]);
-														}
-														if (lines.length > 2) {
-															sign.setLine(2, lines[2]);
-														}
-														if (lines.length > 3) {
-															sign.setLine(3, lines[3]);
-														}
-														sign.update(true);
-													}
-												}
-											}
-										} else if (diskBlockType == Material.CHEST.getId()) {
-											// Chests read
-											List<ItemStack> items = VolumeMapper.readInventoryString(invsReader.readLine());
-
-											// Chests set
-											worldBlock.setType(Material.getMaterial(diskBlockType));
-											worldBlock.setData(diskBlockData);
-											BlockState state = worldBlock.getState();
-											if (state instanceof Chest) {
-												Chest chest = (Chest) state;
-												if (items != null) {
-													int ii = 0;
-													chest.getInventory().clear();
-													for (ItemStack item : items) {
-														if (item != null) {
-															chest.getInventory().setItem(ii, item);
-															ii++;
-														}
-													}
-													chest.update(true);
-												}
-											}
-										} else if (diskBlockType == Material.DISPENSER.getId()) {
-											// Dispensers read
-											List<ItemStack> items = VolumeMapper.readInventoryString(invsReader.readLine());
-
-											// Dispensers set
-											worldBlock.setType(Material.getMaterial(diskBlockType));
-											worldBlock.setData(diskBlockData);
-											BlockState state = worldBlock.getState();
-											if (state instanceof Dispenser) {
-												Dispenser dispenser = (Dispenser) state;
-												if (items != null) {
-													int ii = 0;
-													dispenser.getInventory().clear();
-													for (ItemStack item : items) {
-														if (item != null) {
-															dispenser.getInventory().setItem(ii, item);
-															ii++;
-														}
-													}
-													dispenser.update(true);
-												}
-											}
-										} else if (diskBlockType == Material.WOODEN_DOOR.getId() || diskBlockType == Material.IRON_DOOR_BLOCK.getId()) {
-											// Door blocks
-											deferred.add(new DeferredBlockReset(x, y, z, diskBlockType, diskBlockData));
-										} else if (((diskBlockType == Material.TORCH.getId() && ((diskBlockData & 0x02) == 0x02)) || (diskBlockType == Material.REDSTONE_TORCH_OFF.getId() && ((diskBlockData & 0x02) == 0x02)) || (diskBlockType == Material.REDSTONE_TORCH_ON.getId() && ((diskBlockData & 0x02) == 0x02)) || (diskBlockType == Material.LEVER.getId() && ((diskBlockData & 0x02) == 0x02)) || (diskBlockType == Material.STONE_BUTTON.getId() && ((diskBlockData & 0x02) == 0x02)) || (diskBlockType == Material.LADDER.getId() && ((diskBlockData & 0x04) == 0x04)) || (diskBlockType == Material.RAILS.getId() && ((diskBlockData & 0x02) == 0x02))) && i + 1 != volume.getSizeX()) {
-											// Blocks that hang on a block south of themselves need to make sure that block is there before placing themselves... lol
-											// Change the block itself later on:
-											deferred.add(new DeferredBlockReset(x, y, z, diskBlockType, diskBlockData));
-										} else {
-											// regular block
-											if (diskBlockType >= 0) {
-												worldBlock.setType(Material.getMaterial(diskBlockType));
-												worldBlock.setData(diskBlockData);
-											} else {
-												// The larger than 127 block types were stored as bytes, 
-												// but now -128 to -1 are the result of the bad cast from byte 
-												// to int array above. To make matters worse let's make this
-												// quick a dirty patch. Anyway everything will break horribly 
-												// once block ids get higher than 255.
-												worldBlock.setType(Material.getMaterial(256 + diskBlockType));
-												worldBlock.setData(diskBlockData);
-											}
-										}
-										noOfResetBlocks++;
-									}
-									visitedBlocks++;
-
-									blockReads++;
-
-								} catch (Exception e) {
-									if (!failed) {
-										// Don't spam the console
-										War.war.getLogger().warning("Failed to reset block in zone volume " + volume.getName() + ". " + "Blocks read: " + blockReads + ". Visited blocks so far:" + visitedBlocks + ". Blocks reset: " + noOfResetBlocks + ". Error at x:" + x + " y:" + y + " z:" + z + ". Exception:" + e.getClass().toString() + " " + e.getMessage());
-										e.printStackTrace();
-										failed = true;
-									}
-								} finally {
-									z++;
-								}
-							}
-							y++;
-						}
-						x++;
-					}
-					if (!deferred.isEmpty()) {
-						War.war.getServer().getScheduler().scheduleSyncDelayedTask(War.war, deferred, 2);
-					}
+                    ZoneVolumeLoadJob job = new ZoneVolumeLoadJob(volume, deferred, signsReader, invsReader, blockBytes);
+                    int taskID = War.war.getServer().getScheduler().scheduleSyncRepeatingTask(War.war, job, 1L, 1L);
+                    job.setID(taskID);
 				}
 			} catch (FileNotFoundException e) {
 				War.war.log("Failed to find volume file " + volume.getName() + " for warzone " + zoneName + ". " + e.getClass().getName() + " " + e.getMessage(), Level.WARNING);
@@ -272,6 +135,175 @@ public class ZoneVolumeMapper {
 			return noOfResetBlocks;
 		}
 	}
+
+    static class ZoneVolumeLoadJob implements Runnable {
+        private ZoneVolume volume;
+        private int x, y, z, noOfResetBlocks;
+        private DeferredBlockResetsJob deferred;
+        private BufferedReader signsReader, invsReader;
+        private boolean failed = false;
+        private byte[] blockBytes;
+        private int taskID;
+
+        public ZoneVolumeLoadJob(ZoneVolume volume, DeferredBlockResetsJob deferred, BufferedReader signsReader, BufferedReader invsReader, byte[] blockBytes) {
+            this.volume = volume;
+            this.deferred = deferred;
+            this.signsReader = signsReader;
+            this.invsReader = invsReader;
+            this.blockBytes = blockBytes;
+        }
+
+        public void setID(int taskID) {
+            this.taskID = taskID;
+        }
+
+        public void run() {
+            int blockReads = 0, visitedBlocks = 0, x = 0, y = 0, z = 0, i = 0, j = 0, k = 0;
+            int diskBlockType;
+            byte diskBlockData;
+            Block worldBlock;
+            int worldBlockId;
+            volume.clearBlocksThatDontFloat();
+            x = volume.getMinX();
+            for (i = 0; i < volume.getSizeX(); i++) {
+                y = volume.getMinY();
+                for (j = 0; j < volume.getSizeY(); j++) {
+                    z = volume.getMinZ();
+                    for (k = 0; k < volume.getSizeZ(); k++) {
+                        try {
+                            diskBlockType = blockBytes[visitedBlocks * 2];
+                            diskBlockData = blockBytes[visitedBlocks * 2 + 1];
+
+                            worldBlock = volume.getWorld().getBlockAt(x, y, z);
+                            worldBlockId = worldBlock.getTypeId();
+                            if (worldBlockId != diskBlockType || (worldBlockId == diskBlockType && worldBlock.getData() != diskBlockData) || (worldBlockId == diskBlockType && worldBlock.getData() == diskBlockData && (diskBlockType == Material.WALL_SIGN.getId() || diskBlockType == Material.SIGN_POST.getId() || diskBlockType == Material.CHEST.getId() || diskBlockType == Material.DISPENSER.getId()))) {
+                                if (diskBlockType == Material.WALL_SIGN.getId() || diskBlockType == Material.SIGN_POST.getId()) {
+                                    // Signs read
+                                    String linesStr = signsReader.readLine();
+                                    String[] lines = linesStr.split(";;");
+
+                                    // Signs set
+                                    if (diskBlockType == Material.WALL_SIGN.getId() && ((diskBlockData & 0x04) == 0x04) && i + 1 != volume.getSizeX()) {
+                                        // A sign post hanging on a wall south of here needs that block to be set first
+                                        deferred.add(new DeferredBlockReset(x, y, z, diskBlockType, diskBlockData, lines));
+                                    } else {
+                                        worldBlock.setType(Material.getMaterial(diskBlockType));
+                                        BlockState state = worldBlock.getState();
+                                        state.setData(new org.bukkit.material.Sign(diskBlockType, diskBlockData));
+                                        if (state instanceof Sign) {
+                                            Sign sign = (Sign) state;
+                                            if (lines != null && sign.getLines() != null) {
+                                                if (lines.length > 0) {
+                                                    sign.setLine(0, lines[0]);
+                                                }
+                                                if (lines.length > 1) {
+                                                    sign.setLine(1, lines[1]);
+                                                }
+                                                if (lines.length > 2) {
+                                                    sign.setLine(2, lines[2]);
+                                                }
+                                                if (lines.length > 3) {
+                                                    sign.setLine(3, lines[3]);
+                                                }
+                                                sign.update(true);
+                                            }
+                                        }
+                                    }
+                                } else if (diskBlockType == Material.CHEST.getId()) {
+                                    // Chests read
+                                    List<ItemStack> items = VolumeMapper.readInventoryString(invsReader.readLine());
+
+                                    // Chests set
+                                    worldBlock.setType(Material.getMaterial(diskBlockType));
+                                    worldBlock.setData(diskBlockData);
+                                    BlockState state = worldBlock.getState();
+                                    if (state instanceof Chest) {
+                                        Chest chest = (Chest) state;
+                                        if (items != null) {
+                                            int ii = 0;
+                                            chest.getInventory().clear();
+                                            for (ItemStack item : items) {
+                                                if (item != null) {
+                                                    chest.getInventory().setItem(ii, item);
+                                                    ii++;
+                                                }
+                                            }
+                                            chest.update(true);
+                                        }
+                                    }
+                                } else if (diskBlockType == Material.DISPENSER.getId()) {
+                                    // Dispensers read
+                                    List<ItemStack> items = VolumeMapper.readInventoryString(invsReader.readLine());
+
+                                    // Dispensers set
+                                    worldBlock.setType(Material.getMaterial(diskBlockType));
+                                    worldBlock.setData(diskBlockData);
+                                    BlockState state = worldBlock.getState();
+                                    if (state instanceof Dispenser) {
+                                        Dispenser dispenser = (Dispenser) state;
+                                        if (items != null) {
+                                            int ii = 0;
+                                            dispenser.getInventory().clear();
+                                            for (ItemStack item : items) {
+                                                if (item != null) {
+                                                    dispenser.getInventory().setItem(ii, item);
+                                                    ii++;
+                                                }
+                                            }
+                                            dispenser.update(true);
+                                        }
+                                    }
+                                } else if (diskBlockType == Material.WOODEN_DOOR.getId() || diskBlockType == Material.IRON_DOOR_BLOCK.getId()) {
+                                    // Door blocks
+                                    deferred.add(new DeferredBlockReset(x, y, z, diskBlockType, diskBlockData));
+                                } else if (((diskBlockType == Material.TORCH.getId() && ((diskBlockData & 0x02) == 0x02)) || (diskBlockType == Material.REDSTONE_TORCH_OFF.getId() && ((diskBlockData & 0x02) == 0x02)) || (diskBlockType == Material.REDSTONE_TORCH_ON.getId() && ((diskBlockData & 0x02) == 0x02)) || (diskBlockType == Material.LEVER.getId() && ((diskBlockData & 0x02) == 0x02)) || (diskBlockType == Material.STONE_BUTTON.getId() && ((diskBlockData & 0x02) == 0x02)) || (diskBlockType == Material.LADDER.getId() && ((diskBlockData & 0x04) == 0x04)) || (diskBlockType == Material.RAILS.getId() && ((diskBlockData & 0x02) == 0x02))) && i + 1 != volume.getSizeX()) {
+                                    // Blocks that hang on a block south of themselves need to make sure that block is there before placing themselves... lol
+                                    // Change the block itself later on:
+                                    deferred.add(new DeferredBlockReset(x, y, z, diskBlockType, diskBlockData));
+                                } else {
+                                    // regular block
+                                    if (diskBlockType >= 0) {
+                                        worldBlock.setType(Material.getMaterial(diskBlockType));
+                                        worldBlock.setData(diskBlockData);
+                                    } else {
+                                        // The larger than 127 block types were stored as bytes, 
+                                        // but now -128 to -1 are the result of the bad cast from byte 
+                                        // to int array above. To make matters worse let's make this
+                                        // quick a dirty patch. Anyway everything will break horribly 
+                                        // once block ids get higher than 255.
+                                        worldBlock.setType(Material.getMaterial(256 + diskBlockType));
+                                        worldBlock.setData(diskBlockData);
+                                    }
+                                }
+                                noOfResetBlocks++;
+                            }
+                            visitedBlocks++;
+
+                            blockReads++;
+
+                        } catch (Exception e) {
+                            if (!failed) {
+                                // Don't spam the console
+                                War.war.getLogger().warning("Failed to reset block in zone volume");
+                                e.printStackTrace();
+                                failed = true;
+                            }
+                        } finally {
+                            z++;
+                        }
+                    }
+                    y++;
+                }
+                x++;
+            }
+            if (!deferred.isEmpty()) {
+                War.war.getServer().getScheduler().scheduleSyncDelayedTask(War.war, deferred, 2);
+            }
+            System.out.println("done");
+            War.war.getServer().getScheduler().cancelTask(taskID);
+        }
+    }
+        
 
 	/**
 	 * Saves the given volume

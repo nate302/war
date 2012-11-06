@@ -1034,7 +1034,7 @@ public class Warzone {
 	public void reinitialize() {
 		this.isReinitializing = true;
 		this.getVolume().resetBlocksAsJob();
-		this.initializeZoneAsJob();
+		//this.initializeZoneAsJob();
 	}
 
 	public void handlePlayerLeave(Player player, Location destination, PlayerMoveEvent event, boolean removeFromTeam) {
