@@ -25,6 +25,10 @@ public class ZoneVolume extends Volume {
 		this.zone = zone;
 	}
 
+    public boolean isResetting() {
+        return ZoneVolumeMapper.isLoading();
+    }
+
 	@Override
 	public int saveBlocks() {
 		// Save blocks directly to disk (i.e. don't put everything in memory)
@@ -48,7 +52,7 @@ public class ZoneVolume extends Volume {
 	public int resetBlocks() {
 		// Load blocks directly from disk and onto the map (i.e. no more in-memory warzone blocks)
 		int reset = ZoneVolumeMapper.load(this, this.zone.getName(), this.getWorld(), false);
-		War.war.log("Reset " + reset + " blocks in warzone " + this.zone.getName() + ".", java.util.logging.Level.INFO);
+		//War.war.log("Reset " + reset + " blocks in warzone " + this.zone.getName() + ".", java.util.logging.Level.INFO);
 		this.isSaved = true;
 		return reset;
 	}

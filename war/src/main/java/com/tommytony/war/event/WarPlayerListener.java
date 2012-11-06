@@ -285,6 +285,11 @@ public class WarPlayerListener implements Listener {
 		// Warzone lobby gates
 		if (locLobby != null) {
 			Warzone zone = locLobby.getZone();
+            if (zone.isResetting()) {
+                War.war.badMsg(player, "This zone is resetting");
+                return;
+            }
+
 			Team oldTeam = Team.getTeamByPlayerName(player.getName());
 			boolean isAutoAssignGate = false;
 			if (oldTeam == null && canPlay) { // trying to counter spammy player move

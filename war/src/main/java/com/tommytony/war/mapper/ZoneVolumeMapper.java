@@ -37,6 +37,11 @@ import com.tommytony.war.volume.ZoneVolume;
  * @package com.tommytony.war.mappers
  */
 public class ZoneVolumeMapper {
+    private static boolean loading;
+
+    public static boolean isLoading() { 
+        return loading;
+    }
 
 	/**
 	 * Loads the given volume
@@ -101,6 +106,7 @@ public class ZoneVolumeMapper {
 
 				// Now use the block bytes to reset the world blocks
 				if (!onlyLoadCorners) {
+                    loading = true;
                     volume.clearBlocksThatDontFloat();
 					DeferredBlockResetsJob deferred = new DeferredBlockResetsJob(world);
 
@@ -166,8 +172,6 @@ public class ZoneVolumeMapper {
             byte diskBlockData;
             Block worldBlock;
             int worldBlockId;
-            System.out.println("x before loop " + x);
-            System.out.println("i before loop " + i);
             for (;i < volume.getSizeX(); i++) {
                 y = volume.getMinY();
                 for (j = 0; j < volume.getSizeY(); j++) {
@@ -301,17 +305,14 @@ public class ZoneVolumeMapper {
                 if (x % 4 == 0) {
                     i++;
                     counter++;
-                    System.out.println("i after pass " + i);
-                    System.out.println("x after pass " + x);
-                    System.out.println("Pass");
                     return;
                 }
             }
             if (!deferred.isEmpty()) {
                 War.war.getServer().getScheduler().scheduleSyncDelayedTask(War.war, deferred, 2);
             }
-            System.out.println("done");
             War.war.getServer().getScheduler().cancelTask(taskID);
+            loading = false;
         }
     }
         
