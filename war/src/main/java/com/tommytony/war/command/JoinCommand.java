@@ -89,7 +89,7 @@ public class JoinCommand extends AbstractWarCommand {
 				if (team.getName().startsWith(name) || team.getKind() == kind) {
 					if (!zone.hasPlayerState(player.getName())) {
 						zone.keepPlayerState(player);
-						this.msg("Your inventory is in storage until you use '/war leave'.");
+						this.msg("Use /leave to exit the CTF match.");
 					}
 					if (team.getPlayers().size() < team.getTeamConfig().resolveInt(TeamConfig.TEAMSIZE)) {
 						team.addPlayer(player);

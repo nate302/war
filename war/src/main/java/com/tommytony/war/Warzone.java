@@ -838,7 +838,7 @@ public class Warzone {
 			if (!this.hasPlayerState(player.getName())) {
 				this.keepPlayerState(player);
 			}
-			War.war.msg(player, "Your inventory is in storage until you use '/war leave'.");
+			War.war.msg(player, "Use /leave to exit the CTF match.");
 			this.respawnPlayer(lowestNoOfPlayers, player);
 			/*for (Team team : this.teams) {
 				team.teamcast("" + player.getName() + " joined team " + lowestNoOfPlayers.getName() + ".");
