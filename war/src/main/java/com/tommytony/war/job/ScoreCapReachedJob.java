@@ -53,8 +53,8 @@ public class ScoreCapReachedJob implements Runnable {
 							tp.getInventory().addItem(item);
 						}
 					}*/
-                    War.war.getEconomy().depositPlayer(tp.getName(), 1000);
-                    tp.sendMessage(ChatColor.GREEN + "You have received 1000 Meebles for winning the CTF match!");
+                    //War.war.getEconomy().depositPlayer(tp.getName(), 1000);
+                    //tp.sendMessage(ChatColor.GREEN + "You have received 1000 R for winning the CTF match!");
 				}
 			}
 			t.resetPoints();
